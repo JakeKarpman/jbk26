@@ -1,0 +1,100 @@
+
+public class BST {
+	class Node{ 
+		int val; 
+		Node leftChild, rightChild; 
+
+		public Node(int data){ 
+			val = data; 
+			leftChild = rightChild = null; 
+		} 
+	}
+	Node root; 
+	BST(){  
+		root = null;  
+	}
+	Node insertRec(Node root, int data){
+		if(root == null){
+			root = new Node(data);
+			return root;
+		}
+		if(data<root.val){
+			root.leftChild = insertRec(root.leftChild, data);
+		}
+		else if(data > root.val){ 
+			root.rightChild = insertRec(root.rightChild, data); 
+		}
+		return root;
+	}
+
+	Node deleteRec(Node root, int data){ 
+		if (root == null){  
+			return root; 
+		}
+		if (data < root.val){ 
+			root.leftChild = deleteRec(root.leftChild, data);
+		}
+		else if (data > root.val){ 
+			root.rightChild = deleteRec(root.rightChild, data); 
+		}
+		else{ 
+			if (root.leftChild == null){ 
+				return root.rightChild; 
+			}
+			else if (root.rightChild == null){ 
+				return root.leftChild; 
+			}
+			root.val = findNextRec(root.rightChild, null, data).val; 
+			root.rightChild = deleteRec(root.rightChild, root.val); 
+		} 
+		return root; 
+	}
+	Node findNextRec(Node root, Node succ, int data){
+		if(root == null){
+			return null;
+		}
+		if(root.val == data){
+			if(root.rightChild != null){
+				return findMinRec(root.rightChild);
+			}
+		}
+		else if(data<root.val){
+			succ = root;
+			return findNextRec(root.leftChild, succ, data);
+		}
+		else{
+			return findNextRec(root.rightChild, succ, data);
+		}
+		return succ;
+	}
+	Node findPrevRec(Node root, Node prec, int data){
+		if(root == null){
+			return null;
+		}
+		if(root.val == data){
+			if(root.leftChild != null){
+				return findMaxRec(root.leftChild);
+			}
+		}
+		else if(data< root.val){
+			return findPrevRec(root.leftChild, prec, data);
+		}
+		else{
+			prec = root;
+			return findPrevRec(root.rightChild, prec, data);
+		}
+		return prec;
+	}
+	Node findMinRec(Node root){
+		if(root.leftChild == null){
+			return root;
+		}
+		return findMinRec(root.leftChild);
+	}
+	Node findMaxRec(Node root){
+		if(root.rightChild == null){
+			return root;
+		}
+		return findMaxRec(root.rightChild);
+	}
+}
