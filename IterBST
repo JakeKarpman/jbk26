@@ -1,0 +1,154 @@
+
+public class BST_iter {
+	class Node{ 
+		int val; 
+		Node leftChild, rightChild; 
+
+		public Node(int data){ 
+			val = data; 
+			leftChild = rightChild = null; 
+		} 
+	}
+	Node root; 
+	BST_iter(){  
+		root = null;  
+	}
+	Node insertIter(Node root, int data){
+		Node newNode = new Node(data);
+		Node curr = root;
+		Node foo = null;
+		while(curr != null){
+			foo = curr;
+			if(data<curr.val){
+				curr = curr.leftChild;
+			}
+			else{
+				curr = curr.rightChild;
+			}
+		}
+		if(foo == null){
+			foo = newNode;
+		}
+		else if(data<foo.val){
+			foo.leftChild = newNode;
+		}
+		else{
+			foo.rightChild = newNode;
+		}
+		return foo;
+	}
+	Node deleteIter(Node root, int data){
+		Node foo = null;
+		Node curr = root;
+		while(curr != null && curr.val != data){
+			foo = curr;
+			if(curr.val < data){
+				curr = curr.rightChild;
+			}
+			else{
+				curr = curr.leftChild;
+			}
+		}
+		if(foo == null){
+			return deleteNode(curr);
+		}
+		else if(foo.leftChild == curr){
+			foo.leftChild = deleteNode(curr);
+		}
+		else if(foo.rightChild == curr){
+			foo.rightChild = deleteNode(curr);
+		}
+		return root;
+	}
+	private Node deleteNode(Node root){
+		if(root == null){
+			return null;
+		}
+		if(root.leftChild == null && root.rightChild == null){
+			return null;
+		}
+		else if(root.leftChild == null){
+			return root.rightChild;
+		}
+		else if(root.rightChild == null){
+			return root.leftChild;
+		}
+		else{
+			Node node = root.rightChild;
+			Node foo = root;
+			while(node.leftChild != null){
+				foo = node;
+				node = node.leftChild;
+			}
+			root.val = node.val;
+			if(foo.leftChild == node){
+				foo.leftChild = node.rightChild;
+			}
+			else{
+				foo.rightChild = node.rightChild;
+			}
+			return root;
+		}
+	}
+	Node findNextIter(Node root, Node node){
+		if(root == null){
+			return null;
+		}
+		Node foo = null;
+		Node curr = root;
+		while(curr !=null && curr.val != node.val){
+			if(curr.val > node.val){
+				foo = curr;
+				curr = curr.leftChild;
+			}
+			else{
+				curr = curr.rightChild;
+			}
+		}
+		if(curr == null){
+			return null;
+		}
+		if(curr.rightChild == null){
+			return foo;
+		}
+		curr = curr.rightChild;
+		while(curr.leftChild != null){
+			curr = curr.leftChild;
+		}
+		return curr;
+	}
+	Node findPrevIter(Node root, int data){
+		Node pred = null;
+		while(true){
+			if(data<root.val){
+				root = root.leftChild;
+			}
+			else if(data>root.val){
+				pred = root;
+				root = root.rightChild;
+			}
+			else{
+				if(root.leftChild != null){
+					pred = findMaxIter(root.leftChild);
+				}
+				break;
+			}
+			if(root == null){
+				return null;
+			}
+		}
+		return pred;
+	}
+	Node findMaxIter(Node root){
+		while(root.rightChild != null){
+			root = root.rightChild;
+		}
+		return root;
+	}
+	Node findMinIter(Node root){
+		while(root.leftChild != null){
+			root = root.leftChild;
+		}
+		return root;
+	}
+}
