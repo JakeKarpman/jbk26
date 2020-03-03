@@ -1,0 +1,395 @@
+package constructingTrees;
+
+class Node{
+	int val;
+	Node leftChild;
+	Node rightChild;
+	Node parent;
+	int height;
+
+	Node(int data){
+		this.val = data;
+		this.height = 1;
+		this.leftChild = null;
+		this.rightChild = null;
+		this.parent = null;
+	}
+}
+class AVLIter {
+
+	static Node root;
+	public AVLIter(){
+		AVLIter.root = null;
+	}
+	public int insertIter(int data){
+		Node root = AVLIter.root;
+		Node curr = null;
+		int cnt = 0;
+		while(root != null){
+			cnt++;
+			curr = root;
+			if(data< root.val){
+				root.height +=1;
+				root = root.leftChild;
+			}
+			else if(data>root.val){
+				root.height +=1;
+				root = root.rightChild;
+			}
+		}
+		if(curr == null){
+			AVLIter.root = new Node(data);
+		}
+		else if(data< curr.val){
+			Node left = new Node(data);
+			curr.leftChild = left;
+			left.parent = curr;
+			curr = curr.leftChild;
+		}
+		else{
+			Node right = new Node(data);
+			curr.rightChild = right;
+			right.parent = curr;
+			curr = curr.rightChild;
+		}
+		cascadeBalance(curr);
+		return cnt;
+	}
+	public static int deleteIter(int data){
+		int cnt = 0;
+		Node root = AVLIter.root;
+		boolean same = false;
+		while(root != null){
+			cnt++;
+			if(data<root.val){
+				root = root.leftChild;
+			}
+			else if(data>root.val){
+				root = root.rightChild;
+			}
+			else{
+				cnt--;
+				if(root.leftChild == null && root.rightChild == null){
+					if(root.parent == null){
+						AVLIter.root = null;
+						break;
+					}
+					if(root.parent.leftChild == root){
+						root.parent.leftChild = null;
+					}
+					else{
+						root.parent.rightChild = null;
+					}
+					cascadeHeight(root.parent);
+					cascadeBalance(root.parent);
+				}
+				else if(root.leftChild == null){
+					root.val = root.rightChild.val;
+					root.rightChild = null;
+					cascadeBalance(root);
+				}
+				else if(root.rightChild == null){
+					root.val = root.leftChild.val;
+					root.leftChild = null;
+					cascadeHeight(root);
+					cascadeBalance(root);
+				}
+				else{
+					same = true;
+					int min = findMinIter(root.rightChild);
+					root.val = min;
+				}
+				break;
+			}
+		}
+		if(same){
+			int sameVal = root.val;
+			root = root.rightChild;
+			while(root != null){
+				if(sameVal < root.val){
+					root = root.leftChild;
+					continue;
+				}
+				if(root.parent.leftChild.val == sameVal){
+					if(root.rightChild != null){
+						root.rightChild.parent = root.parent;
+						root.parent.leftChild = root.rightChild;
+						cascadeHeight(root.parent);
+						cascadeBalance(root.parent);
+						root = null;
+					}
+					else if(root.leftChild != null){
+						root.leftChild.parent = root.parent;
+						root.parent.leftChild = root.leftChild;
+						cascadeHeight(root.parent);
+						cascadeBalance(root.parent);
+						root = null;
+					}
+					else{
+						root.parent.leftChild = null;
+						cascadeHeight(root.parent);
+						cascadeBalance(root.parent);
+						root = null;
+					}
+				}
+				else if(root.parent.rightChild.val == sameVal){
+					if(root.leftChild != null){
+						root.leftChild.parent = root.parent;
+						root.parent.rightChild = root.leftChild;
+						cascadeHeight(root.parent);
+						cascadeBalance(root.parent);
+						root = null;
+					}
+					else if(root.rightChild != null){
+						root.rightChild.parent = root.parent;
+						root.parent.rightChild = root.rightChild;
+						cascadeHeight(root.parent);
+						cascadeBalance(root.parent);
+						root = null;
+					}
+					else{
+						root.parent.rightChild = null;
+						cascadeHeight(root.parent);
+						cascadeBalance(root.parent);
+						root = null;
+					}
+				}
+			}
+
+		}
+		return cnt;
+	}
+	public static int findNextIter(Node node, int data){
+		while(node != null){
+			if(data<node.val){
+				node = node.leftChild;
+			}
+			else if(data>node.val){
+				node  = node.rightChild;
+			}
+			else{
+				if(node.rightChild != null){
+					return findMinIter(node.rightChild);
+				}
+				while(node.parent != null){
+					if(node.parent.leftChild == node){
+						return node.parent.val;
+					}
+					node = node.parent;
+				}
+				return -1;
+			}
+		}
+		return -1;
+	}
+	public static int findPrevIter(Node node, int data){
+		while(node != null){
+			if(data<node.val){
+				node = node.leftChild;
+			}
+			else if(data>node.val){
+				node = node.rightChild;
+			}
+			else{
+				if(node.rightChild != null){
+					return findMinIter(node.rightChild);
+				}
+				while(node.parent != null){
+					if(node.parent.leftChild == node){
+						return node.parent.val;
+					}
+					node = node.parent;
+				}
+			}
+		}
+		return -1;
+	}
+	public static int findMinIter(Node node){
+		int min = node.val;
+		while(node != null){
+			min = node.val;
+			node = node.leftChild;
+		}
+		return min;
+	}
+	public static int findMaxIter(Node node){
+		int max = node.val;
+		while(node != null){
+			max = node.val;
+			node = node.rightChild;
+		}
+		return max;
+	}
+	public static int max(int a, int b){
+		if(a>b){
+			return a;
+		}
+		else{
+			return b;
+		}
+	}
+	public static int cascadeCurrHeight(Node node){
+		if(node.leftChild == null && node.rightChild == null){
+			return 1;
+		}
+		if(node.leftChild == null){
+			return node.rightChild.height +1;
+		}
+		if(node.rightChild == null){
+			return node.leftChild.height+1;
+		}
+		return max(node.leftChild.height, node.rightChild.height)+1;
+	}
+	public static void cascadeHeight(Node node){
+		Node curr = node;
+		while(curr != null){
+			curr.height = cascadeCurrHeight(curr);
+			curr = curr.parent;
+		}
+	}
+	public static int getHeight(Node node){
+		if(node == null){
+			return 0;
+		}
+		return node.height;
+	}
+	public static void rotateRight(Node node){
+		Node parent, leftNode;
+		if(node.parent != null){
+			parent = node.parent;
+		}
+		else{
+			parent = null;
+		}
+		leftNode = node.leftChild;
+		if(parent != null){
+			if(node.val < parent.val){
+				parent.leftChild = leftNode;
+				leftNode.parent = parent;
+			}
+			else{
+				parent.rightChild = leftNode;
+				leftNode.parent = parent;
+			}
+		}
+		else{
+			root = leftNode;
+			leftNode.parent = null;
+		}
+		node.leftChild = leftNode.rightChild;
+		if(leftNode.rightChild != null){
+			leftNode.rightChild.parent = node;
+		}
+		node.parent = leftNode;
+		leftNode.rightChild = node;
+
+		node.height = 1 + max(getHeight(node.leftChild), getHeight(node.rightChild));
+		leftNode.height = 1 + max(getHeight(leftNode.leftChild), getHeight(leftNode.rightChild));
+	}
+	public static void rotateLeft(Node node){
+		Node parent, rightNode;
+		if(node.parent != null){
+			parent = node.parent;
+		}
+		else{
+			parent  = null;
+		}
+		rightNode = node.rightChild;
+		if(parent != null){
+			if(node.val > parent.val){
+				parent.rightChild = rightNode;
+				rightNode.parent = parent;
+			}
+			else{
+				parent.leftChild = rightNode;
+				rightNode.parent = parent;
+			}
+		}
+		else{
+			root = rightNode;
+			rightNode.parent = null;
+		}
+		node.rightChild = rightNode.leftChild;
+		if(rightNode.leftChild != null){
+			rightNode.leftChild.parent = node;
+		}
+		node.parent = rightNode;
+		rightNode.leftChild = node;
+
+		node.height = 1 + max(getHeight(node.leftChild), getHeight(node.rightChild));
+		rightNode.height = 1 + max(getHeight(rightNode.leftChild), getHeight(rightNode.rightChild));
+
+	}
+	public static int balanceF(Node node){
+		if(node == null){
+			return 0;
+		}
+		return getHeight(node.leftChild) - getHeight(node.rightChild);
+	}
+	public static void cascadeBalance(Node node){
+		Node curr = node;
+		int factor, lFactor, rFactor;
+		while(curr != null){
+			factor = balanceF(curr);
+			lFactor = balanceF(curr.leftChild);
+			rFactor = balanceF(curr.rightChild);
+			curr.height = 1 + max(getHeight(curr.leftChild), getHeight(curr.rightChild));
+			if(Math.abs(factor)<=1){
+				curr = curr.parent;
+				continue;
+			}
+			if(factor>0 && lFactor>= 0){
+				rotateRight(curr);
+				continue;
+			}
+			else if(factor<0 && rFactor<=0){
+				rotateLeft(curr);
+			}
+			else if(factor>0 && lFactor<0){
+				rotateLeft(curr.leftChild);
+				rotateRight(curr);
+			}
+			else if(factor<0 && rFactor>0){
+				rotateRight(curr.rightChild);
+				rotateLeft(curr);
+				continue;
+			}
+		}
+	}
+	public static void main(String [] args){
+		AVLIter avltree = new AVLIter();
+		int[] a;
+		a = getRandomArray(100);
+		/*avltree.insertIter(10);
+		avltree.insertIter(20);
+		avltree.insertIter(30);
+		avltree.insertIter(40);
+		avltree.insertIter(50);
+		avltree.insertIter(25);*/
+		for(int i = 0; i<a.length; i++){
+			avltree.insertIter(a[i]);
+		}
+		preOrder(root);
+	}
+	public static void preOrder(Node node){
+		if(node != null){
+			System.out.print(node.val + " ");
+			preOrder(node.leftChild);
+			preOrder(node.rightChild);
+		}
+	}
+	public static int[] getRandomArray(int n){
+		int [] output = new int[n];
+		for (int i = 0; i < n; i++) {
+			output[i] = (int)(Math.random()*n);
+			for (int j = 0; j < i; j++) {
+				if (output[i] == output[j]) {
+					i--; 
+					break;
+				}
+			}  
+		}
+		return output;
+	}
+
+}
