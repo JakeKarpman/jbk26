@@ -1,5 +1,4 @@
-package constructingTrees;
-
+import java.util.Stack;
 class Node{
 	int val;
 	Node leftChild;
@@ -371,12 +370,23 @@ class AVLIter {
 		}
 		preOrder(root);
 	}
-	public static void preOrder(Node node){
-		if(node != null){
-			System.out.print(node.val + " ");
-			preOrder(node.leftChild);
-			preOrder(node.rightChild);
-		}
+	public static void preOrder(Node node){ //Implemented purely for testing!//
+		if (node == null) { 
+            		return; 
+        	} 
+        	Stack<Node> nodeStack = new Stack<Node>(); 
+        	nodeStack.push(root); 
+        	while(nodeStack.empty() == false) { 
+            		Node mynode = nodeStack.peek(); 
+            		System.out.print(mynode.data + " "); 
+            		nodeStack.pop(); 
+            		if(mynode.right != null) { 
+                		nodeStack.push(mynode.right); 
+            		} 
+            		if(mynode.left != null) { 
+                	nodeStack.push(mynode.left); 
+            		} 
+        	} 
 	}
 	public static int[] getRandomArray(int n){
 		int [] output = new int[n];
