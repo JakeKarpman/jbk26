@@ -1,5 +1,5 @@
-
-public class BST {
+package constructingTrees;
+public class BST_iter {
 	class Node{ 
 		int val; 
 		Node leftChild, rightChild; 
@@ -9,92 +9,182 @@ public class BST {
 			leftChild = rightChild = null; 
 		} 
 	}
-	Node root; 
-	BST(){  
+	static Node root; 
+	static int levels;
+	BST_iter(){  
 		root = null;  
 	}
-	Node insertRec(Node root, int data){
-		if(root == null){
-			root = new Node(data);
-			return root;
+
+	public Node insertIter(Node root, int data){
+		Node newNode = new Node(data);
+		Node curr = root;
+		Node foo = null;
+		while(curr != null){
+			levels++;
+			foo = curr;
+			if(data<curr.val){
+				curr = curr.leftChild;
+			}
+			else{
+				curr = curr.rightChild;
+			}
 		}
-		if(data<root.val){
-			root.leftChild = insertRec(root.leftChild, data);
+		if(foo == null){
+			foo = newNode;
 		}
-		else if(data > root.val){ 
-			root.rightChild = insertRec(root.rightChild, data); 
+		else if(data<foo.val){
+			foo.leftChild = newNode;
+		}
+		else{
+			foo.rightChild = newNode;
+		}
+		return foo;
+	}
+	Node deleteIter(Node root, int data){
+		Node foo = null;
+		Node curr = root;
+		while(curr != null && curr.val != data){
+			foo = curr;
+			if(curr.val < data){
+				curr = curr.rightChild;
+			}
+			else{
+				curr = curr.leftChild;
+			}
+		}
+		if(foo == null){
+			return deleteNode(curr);
+		}
+		else if(foo.leftChild == curr){
+			foo.leftChild = deleteNode(curr);
+		}
+		else if(foo.rightChild == curr){
+			foo.rightChild = deleteNode(curr);
 		}
 		return root;
 	}
+	private Node deleteNode(Node root){
+		if(root == null){
+			return null;
+		}
+		if(root.leftChild == null && root.rightChild == null){
+			return null;
+		}
+		else if(root.leftChild == null){
+			return root.rightChild;
+		}
+		else if(root.rightChild == null){
+			return root.leftChild;
+		}
+		else{
+			Node node = root.rightChild;
+			Node foo = root;
+			while(node.leftChild != null){
+				foo = node;
+				node = node.leftChild;
+			}
+			root.val = node.val;
+			if(foo.leftChild == node){
+				foo.leftChild = node.rightChild;
+			}
+			else{
+				foo.rightChild = node.rightChild;
+			}
+			return root;
+		}
+	}
+	Node findNextIter(Node root, Node node){
+		if(root == null){
+			return null;
+		}
+		Node foo = null;
+		Node curr = root;
+		while(curr !=null && curr.val != node.val){
+			if(curr.val > node.val){
+				foo = curr;
+				curr = curr.leftChild;
+			}
+			else{
+				curr = curr.rightChild;
+			}
+		}
+		if(curr == null){
+			return null;
+		}
+		if(curr.rightChild == null){
+			return foo;
+		}
+		curr = curr.rightChild;
+		while(curr.leftChild != null){
+			curr = curr.leftChild;
+		}
+		return curr;
+	}
+	Node findPrevIter(Node root, int data){
+		Node pred = null;
+		while(true){
+			if(data<root.val){
+				root = root.leftChild;
+			}
+			else if(data>root.val){
+				pred = root;
+				root = root.rightChild;
+			}
+			else{
+				if(root.leftChild != null){
+					pred = findMaxIter(root.leftChild);
+				}
+				break;
+			}
+			if(root == null){
+				return null;
+			}
+		}
+		return pred;
+	}
+	Node findMaxIter(Node root){
+		while(root.rightChild != null){
+			root = root.rightChild;
+		}
+		return root;
+	}
+	Node findMinIter(Node root){
+		while(root.leftChild != null){
+			root = root.leftChild;
+		}
+		return root;
+	}
+	public static void main(String [] args){
+		BST_iter bst = new BST_iter();
+		Node root = null; //Below is done purely for testing
+		int []a;
+		a = getRandomArray(10000);
+		root = bst.insertIter(root, a[0]);
+		for(int i = 1; i<a.length;i++){
+			bst.insertIter(root, a[i]);
+		}
+		preOrder(root);
+	}
+	public static void preOrder(Node node){
+		if(node != null){
+			System.out.print(node.val + " ");
+			preOrder(node.leftChild);
+			preOrder(node.rightChild);
+		}
+	}
+	
+	public static int[] getRandomArray(int n){
+		int [] output = new int[n];
+		for (int i = 0; i < n; i++) {
+			output[i] = (int)(Math.random()*n);
+			for (int j = 0; j < i; j++) {
+				if (output[i] == output[j]) {
+					i--; 
+					break;
+				}
+			}  
+		}
+		return output;
+	}
 
-	Node deleteRec(Node root, int data){ 
-		if (root == null){  
-			return root; 
-		}
-		if (data < root.val){ 
-			root.leftChild = deleteRec(root.leftChild, data);
-		}
-		else if (data > root.val){ 
-			root.rightChild = deleteRec(root.rightChild, data); 
-		}
-		else{ 
-			if (root.leftChild == null){ 
-				return root.rightChild; 
-			}
-			else if (root.rightChild == null){ 
-				return root.leftChild; 
-			}
-			root.val = findNextRec(root.rightChild, null, data).val; 
-			root.rightChild = deleteRec(root.rightChild, root.val); 
-		} 
-		return root; 
-	}
-	Node findNextRec(Node root, Node succ, int data){
-		if(root == null){
-			return null;
-		}
-		if(root.val == data){
-			if(root.rightChild != null){
-				return findMinRec(root.rightChild);
-			}
-		}
-		else if(data<root.val){
-			succ = root;
-			return findNextRec(root.leftChild, succ, data);
-		}
-		else{
-			return findNextRec(root.rightChild, succ, data);
-		}
-		return succ;
-	}
-	Node findPrevRec(Node root, Node prec, int data){
-		if(root == null){
-			return null;
-		}
-		if(root.val == data){
-			if(root.leftChild != null){
-				return findMaxRec(root.leftChild);
-			}
-		}
-		else if(data< root.val){
-			return findPrevRec(root.leftChild, prec, data);
-		}
-		else{
-			prec = root;
-			return findPrevRec(root.rightChild, prec, data);
-		}
-		return prec;
-	}
-	Node findMinRec(Node root){
-		if(root.leftChild == null){
-			return root;
-		}
-		return findMinRec(root.leftChild);
-	}
-	Node findMaxRec(Node root){
-		if(root.rightChild == null){
-			return root;
-		}
-		return findMaxRec(root.rightChild);
-	}
 }
